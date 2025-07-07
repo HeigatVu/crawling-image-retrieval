@@ -10,7 +10,7 @@ The project is organized into three main Jupyter notebooks, each handling a dist
 * **`image_urls.json`**: The output of the crawler, containing all the collected image URLs in a structured JSON format.
 * **`preprocessing.ipynb`**: The second stage. This notebook handles downloading, cleaning, and organizing the images from the URLs into a clean, structured dataset ready for model training/inference.
 * **`filename.txt`**: An output of the preprocessing notebook, listing the file paths of all the cleaned images.
-* **`vectorDB-CLIP.ipynb`**: The final stage. This notebook implements the core image retrieval logic using the prepared dataset, the CLIP model, and a vector database for efficient search.
+* **`vectorDB-CLIP.ipynb`**: The final stage. This notebook implements the core image retrieval logic using the prepared dataset, the CLIP model, and a vector database for efficient search. [(I was tested L1, L2, Cosine Similarity, and correlation coefficient)](https://github.com/HeigatVu/image-retrieval)
 
 ---
 
