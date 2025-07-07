@@ -2,7 +2,7 @@
 
 This repository contains a complete, automated pipeline for building a custom image dataset for machine learning tasks. The scripts handle everything from finding and downloading images from the web to cleaning, processing, and organizing them into a structured `train`/`test` format.
 
-This project was developed to create a personalized dataset for an [Image Retrieval project](https://github.com/your-username/image-retrieval-repo) but is designed to be a standalone, reusable pipeline.
+This project was developed to create a personalized dataset for an [Image Retrieval project](https://github.com/HeigatVu/image-retrieval), which I code previously but is designed to be a standalone, reusable pipeline.
 
 ## 📋 Pipeline Overview
 
@@ -12,9 +12,6 @@ The entire process is broken down into four distinct, automated stages:
 2.  **Image Downloading**: Downloads the actual image files from the collected URLs, handling potential errors and organizing the raw images into a nested folder structure.
 3.  **Data Cleaning**: Validates the downloaded images, removing corrupted files, tiny thumbnails, and standardizing image formats to ensure a high-quality dataset.
 4.  **Dataset Organization**: Automatically splits the cleaned images into `train` and `test` sets for each class, creating the final directory structure required by most deep learning frameworks.
-
-![Data Pipeline Diagram](https://i.imgur.com/gS3g1hV.png)
-*(A conceptual diagram of the data collection process)*
 
 ---
 
