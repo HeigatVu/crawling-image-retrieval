@@ -1,103 +1,69 @@
-# Web Scraping & Dataset Creation Pipeline for Machine Learning
+# End-to-End Image Retrieval System with CLIP and Custom Data Pipeline
 
-This repository contains a complete, automated pipeline for building a custom image dataset for machine learning tasks. The scripts handle everything from finding and downloading images from the web to cleaning, processing, and organizing them into a structured `train`/`test` format.
+This repository contains the complete code for an advanced image retrieval system. The project covers the full machine learning lifecycle: from building a custom dataset by scraping the web to implementing a highly efficient, deep learning-based similarity search engine using CLIP and a vector database.
 
-This project was developed to create a personalized dataset for an [Image Retrieval project](https://github.com/HeigatVu/image-retrieval), which I code previously but is designed to be a standalone, reusable pipeline.
+The project is organized into three main Jupyter notebooks, each handling a distinct stage of the pipeline.
 
-## 📋 Pipeline Overview
+## 📂 Repository Structure
 
-The entire process is broken down into four distinct, automated stages:
-
-1.  **URL Scraping**: Programmatically browses a target website (Flickr) to find and collect thousands of direct image URLs based on a list of specified search terms.
-2.  **Image Downloading**: Downloads the actual image files from the collected URLs, handling potential errors and organizing the raw images into a nested folder structure.
-3.  **Data Cleaning**: Validates the downloaded images, removing corrupted files, tiny thumbnails, and standardizing image formats to ensure a high-quality dataset.
-4.  **Dataset Organization**: Automatically splits the cleaned images into `train` and `test` sets for each class, creating the final directory structure required by most deep learning frameworks.
+* **`crawler.ipynb`**: The first stage. A web scraper that browses Flickr to collect thousands of image URLs based on specified search terms.
+* **`image_urls.json`**: The output of the crawler, containing all the collected image URLs in a structured JSON format.
+* **`preprocessing.ipynb`**: The second stage. This notebook handles downloading, cleaning, and organizing the images from the URLs into a clean, structured dataset ready for model training/inference.
+* **`filename.txt`**: An output of the preprocessing notebook, listing the file paths of all the cleaned images.
+* **`vectorDB-CLIP.ipynb`**: The final stage. This notebook implements the core image retrieval logic using the prepared dataset, the CLIP model, and a vector database for efficient search.
 
 ---
 
-## ⚙️ How It Works: A Step-by-Step Guide
+## 🚀 Project Pipeline & Workflow
 
-### Step 1: Scraping Image URLs from Flickr
+To run this project, the notebooks must be executed in the following order.
 
-A powerful web scraper was built to gather image sources automatically.
+### Stage 1: Data Collection (`crawler.ipynb`)
 
-* **Target Website**: `flickr.com` was chosen for its vast collection of high-quality, user-submitted photos.
-* **Core Technology**:
-    * **`Selenium`**: Used to control a web browser programmatically. This is crucial for interacting with modern, dynamic websites like Flickr that use "lazy loading" (where content is loaded as you scroll) and require clicking "Load more" buttons to view all results.
-    * **`BeautifulSoup`**: Used to parse the page's HTML source code and precisely extract the `src` attribute from `<img>` tags, which contains the direct URL to the image file.
-* **High-Speed Scraping**: The script uses Python's `concurrent.futures` module to implement multi-threading. This allows it to scrape multiple search terms (e.g., "Cat", "Dog", "Monkey") simultaneously, dramatically reducing the time needed to collect thousands of URLs.
-* **Output**: The final output of this stage is a single `image_urls.json` file. This file contains a dictionary where keys are the search categories and values are lists of all the image URLs found for that category.
+This notebook automates the process of building a large, custom image dataset from the web.
 
-### Step 2: Downloading Images from URLs
+* **Objective**: To gather thousands of image URLs from `flickr.com`.
+* **Methodology**:
+    * Uses **Selenium** to programmatically control a web browser, which is necessary to handle dynamic web elements like infinite scrolling and "load more" buttons.
+    * Uses **BeautifulSoup** to parse the page's HTML and extract the source URLs from `<img>` tags.
+    * Employs multi-threading (`concurrent.futures`) to scrape multiple search categories simultaneously, significantly speeding up the collection process.
+* **How to Run**:
+    1.  Define the `categories` and search terms you wish to collect inside the notebook.
+    2.  Execute all cells in `crawler.ipynb`.
+* **Output**: A file named **`image_urls.json`** containing all the scraped URLs.
 
-This script takes the `image_urls.json` file and downloads the images.
+### Stage 2: Data Preprocessing & Organization (`preprocessing.ipynb`)
 
-* **Robust Downloader**: The script iterates through every URL for every category.
-* **Efficient & Polite**:
-    * **Multi-threading**: Just like the scraper, the downloader uses multiple threads to download several images at once, maximizing network usage.
-    * **Polite Delay**: To prevent overwhelming the Flickr servers and avoid getting our IP address temporarily blocked for making too many requests, a "polite delay" of a few seconds is added between batches of downloads. This is critical for responsible scraping.
-* **Initial Organization**: As images are downloaded, they are automatically saved into a structured directory: `Dataset/{category}/{term}/{image_filename}.jpg`.
+This notebook takes the raw URLs from the previous stage and turns them into a clean, structured dataset.
 
-### Step 3: Cleaning the Raw Dataset
+* **Objective**: To download, validate, clean, and organize the images.
+* **Methodology**:
+    1.  **Downloading**: Reads the `image_urls.json` file and downloads each image, using multi-threading and a "polite delay" to avoid server issues.
+    2.  **Cleaning**: Performs a quality check on every downloaded image. It automatically deletes corrupted files and any images smaller than 50x50 pixels (which are likely icons or low-quality thumbnails).
+    3.  **Standardizing**: Converts all images to the standard `RGB` format for model compatibility.
+    4.  **Organizing**: Splits the cleaned images for each class into `train` and `test` sets, creating the final `data/` directory.
+* **How to Run**:
+    1.  Ensure `image_urls.json` is present.
+    2.  Execute all cells in `preprocessing.ipynb`.
+* **Output**: A clean `data/` folder structured for machine learning and a `filename.txt` listing all valid image paths.
 
-A raw dataset from the web is often messy. This script ensures data quality.
+### Stage 3: Image Retrieval Engine (`vectorDB-CLIP.ipynb`)
 
-* **Image Validation**: The script iterates through every file in the `Dataset` directory.
-* **Automated Cleaning Actions**:
-    1.  **Delete Corrupted Files**: It attempts to open each file. If a file is not a valid image or is corrupted, it is automatically deleted.
-    2.  **Remove Small Images**: Images with dimensions smaller than 50x50 pixels are removed, as these are typically low-quality thumbnails or icons unsuitable for training.
-    3.  **Standardize Format**: All valid images are converted and saved in the standard `RGB` format to ensure consistency for the model training phase.
+This is the core of the project, where the similarity search happens.
 
-### Step 4: Organizing the Final Dataset
-
-The final script prepares the clean data for a machine learning model.
-
-* **Train/Test Split**: The script reads the list of all cleaned image files and, for each class (e.g., "Cat"), it systematically moves a specified number of images into a `data/train/Cat` folder and the remaining images into a `data/test/Cat` folder.
-* **Final Output**: The pipeline's final product is a `data` directory, perfectly structured and ready to be fed into a deep learning framework like PyTorch or TensorFlow.
+* **Objective**: To take a query image and find the most visually similar images from the custom-built dataset.
+* **Methodology**:
+    1.  **Feature Extraction**: Uses a pre-trained **CLIP (Contrastive Language-Image Pre-Training)** model to convert every image in the `data/` folder into a high-dimensional feature vector (embedding). These embeddings capture the semantic meaning of the image content.
+    2.  **Vector Database**: The generated embeddings are stored and indexed in a **ChromaDB** collection. This database is optimized for extremely fast similarity searches over vector data.
+    3.  **Similarity Search**: When a user provides a query image, it is converted into an embedding using CLIP. This embedding is then used to query the ChromaDB collection. **Cosine Similarity** is used as the distance metric to find the vectors (and corresponding images) that are closest in the high-dimensional space.
+* **How to Run**:
+    1.  Ensure the `data/` folder has been created by the preprocessing notebook.
+    2.  Execute all cells in `vectorDB-CLIP.ipynb`.
+    3.  Provide a path to a query image to see the results.
 
 ## 🛠️ Technologies Used
 
-* **Python 3**
-* **Selenium**: For browser automation and handling dynamic web content.
-* **BeautifulSoup4**: For parsing HTML and extracting data.
-* **Pillow (PIL)**: For image processing (opening, converting, checking dimensions).
-* **Standard Libraries**: `concurrent.futures` (for multi-threading), `os`, `shutil`, `json`, `urllib`.
-
-## 🚀 How to Run the Pipeline
-
-1.  **Setup & Installation**:
-    * Clone this repository.
-    * Install the required Python packages:
-        ```bash
-        pip install selenium beautifulsoup4 Pillow
-        ```
-    * Download and set up the appropriate `WebDriver` for your browser (e.g., `chromedriver` for Google Chrome) and ensure it's in your system's PATH.
-
-2.  **Configure the Scraper**:
-    * Open the scraping script (`scrape_urls.py`).
-    * Modify the `categories` dictionary to define the search terms you want to collect images for.
-
-3.  **Execute the Scripts in Order**:
-    * **1. Run the Scraper**:
-        ```bash
-        python scrape_urls.py
-        ```
-        This will create the `image_urls.json` file.
-
-    * **2. Run the Downloader**:
-        ```bash
-        python download_images.py
-        ```
-        This will download all images into the `Dataset/` directory.
-
-    * **3. Run the Cleaner**:
-        ```bash
-        python clean_dataset.py
-        ```
-        This will process the images inside the `Dataset/` directory.
-
-    * **4. Run the Organizer**:
-        ```bash
-        python organize_dataset.py
-        ```
-        This will create the final `data/` directory with `train/` and `test/` subfolders.
+* **Data Collection**: `Selenium`, `BeautifulSoup4`
+* **Data Processing**: `Pillow (PIL)`, `NumPy`
+* **ML/Vector Search**: `open-clip-torch`, `chromadb`
+* **Core Python**: `concurrent.futures`, `os`, `shutil`, `json`
